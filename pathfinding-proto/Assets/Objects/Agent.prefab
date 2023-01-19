@@ -133,6 +133,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bd4f65b0a318f84d8d97fa294f6c02d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SpeedIndicator: {fileID: 59832550707570051, guid: 17437eedd39a6ee488fcec25138c76df, type: 3}
+  MaxSpeed: 3.5
+  RecordedSpeeds: []
 --- !u!96 &4725171562074918039
 TrailRenderer:
   serializedVersion: 2
@@ -141,7 +144,7 @@ TrailRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5145755789001138657}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1

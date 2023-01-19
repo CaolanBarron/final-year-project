@@ -105,7 +105,7 @@ public class ScenarioManager : MonoBehaviour
         for (int i = 0; i < agents.Count; i++)
         {
             agents[i].Color = colors[i];
-            agents[i].UpdateColor();
+            //agents[i].UpdateColor();
         }
         
     }
