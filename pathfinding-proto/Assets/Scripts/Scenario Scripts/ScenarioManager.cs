@@ -29,6 +29,8 @@ public class ScenarioManager : MonoBehaviour
         Instance = this;
         canvas = GameObject.FindGameObjectWithTag("Canvas").gameObject;
         DontDestroyOnLoad(this);
+        DontDestroyOnLoad(canvas.gameObject);
+        DontDestroyOnLoad(GameObject.FindWithTag("EventSystem").gameObject);
     }
     private void OnEnable()
     {

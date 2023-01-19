@@ -8,6 +8,11 @@ TagManager:
   - StartArea
   - Obstacle
   - Canvas
+  - CamMoveUp
+  - CamMoveDown
+  - CamRotLeft
+  - CamRotRight
+  - EventSystem
   layers:
   - Default
   - TransparentFX
