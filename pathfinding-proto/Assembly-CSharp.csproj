@@ -53,6 +53,7 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\MakeNoise.cs" />
+     <Compile Include="Assets\Scripts\College\CollegeScenarioManager.cs" />
      <Compile Include="Assets\Scripts\StartArea.cs" />
      <Compile Include="Assets\Scripts\SafeArea.cs" />
      <Compile Include="Assets\Scripts\Scenario Scripts\ScenarioManager.cs" />
@@ -60,6 +61,7 @@
      <Compile Include="Assets\Scripts\Agent.cs" />
      <Compile Include="Assets\Scripts\Path.cs" />
      <Compile Include="Assets\Scripts\CameraController.cs" />
+     <Compile Include="Assets\Scripts\College\CollegeAgent.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />

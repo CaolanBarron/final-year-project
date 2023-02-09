@@ -23,4 +23,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Scenario 4.unity
     guid: 5bcc3df814696d14094621ba1ad7701e
+  - enabled: 1
+    path: Assets/Scenes/CollegeScenario.unity
+    guid: 466f65ad2b752b849b317eea1146044c
   m_configObjects: {}
