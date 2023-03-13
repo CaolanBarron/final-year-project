@@ -13,6 +13,23 @@ TagManager:
   - CamRotLeft
   - CamRotRight
   - EventSystem
+  - SafeSurface
+  - SafePoint
+  - GlobalStatsPanel
+  - AgentStatsPanel
+  - TimerOutTxt
+  - GlobalSpeedOutTxt
+  - GlobalSlowOutTxt
+  - GlobalDistanceOutTxt
+  - GlobalObstructionOutTxt
+  - SpeedOutTxt
+  - AgentOutTxt
+  - Undefined
+  - AgentSpeedOut
+  - AgentSlowOut
+  - AgentDistanceOut
+  - AgentObstructionOut
+  - AgentNameOut
   layers:
   - Default
   - TransparentFX

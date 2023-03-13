@@ -133,7 +133,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cbd89442a19a7d468390133ceca5fa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ReachSafety: 0
+  OnTime: {fileID: 3871709754834882358, guid: 3af7d91a40e4f0e4c9a46ecba1fa54f2, type: 3}
+  JustOff: {fileID: 7042827154015387760, guid: 0e92023b758caec42a2a58a1c8e45fc8, type: 3}
+  TooSlow: {fileID: 2981192304082303330, guid: ec9009d62d1a57044b317d1bbbbfcf08, type: 3}
+  successRadius: 3
   MaxSpeed: 3.5
+  PaceIntervals: []
+  MeanSpeed: 0
 --- !u!96 &5423872794662535348
 TrailRenderer:
   serializedVersion: 2
@@ -196,9 +203,9 @@ TrailRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 0, g: 0, b: 0, a: 1}
-      key1: {r: 0, g: 0, b: 0, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
+      key0: {r: 1, g: 0, b: 0, a: 0.5176471}
+      key1: {r: 1, g: 0, b: 0, a: 0.5247405}
+      key2: {r: 0, g: 0, b: 0, a: 0.20784314}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
@@ -213,8 +220,8 @@ TrailRenderer:
       ctime6: 0
       ctime7: 0
       atime0: 0
-      atime1: 65535
-      atime2: 0
+      atime1: 964
+      atime2: 65535
       atime3: 0
       atime4: 0
       atime5: 0
@@ -222,7 +229,7 @@ TrailRenderer:
       atime7: 0
       m_Mode: 0
       m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
+      m_NumAlphaKeys: 3
     numCornerVertices: 0
     numCapVertices: 0
     alignment: 0
