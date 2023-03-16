@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -6,118 +7,42 @@ using UnityEngine.AI;
 
 public class CollegeAgent : MonoBehaviour
 {
-    private NavMeshAgent navAgent;
-    private TrailRenderer _trailRenderer;
+    [Header("Agent settings")] 
+    public float MaxSpeed = 3.5f;
+    
     private bool Active;
-    public bool ReachSafety = false;
     private Transform closestSafeSurface;
+    private Vector3 startingPosition;
+    private NavMeshAgent navAgent;
+    private NavMeshPath path;
+    private Vector3 previousPosition;
+    private List<float> PaceIntervals;
 
-    public GameObject OnTime;
-    public GameObject JustOff;
-    public GameObject TooSlow;
 
     
-    public float successRadius = 3.0f;
-    [Header("Movement")] 
-    public float MaxSpeed = 3.5f;
-
-
-    private Vector3 startingPosition;
-    private NavMeshPath path;
-
+    //
+    // UNITY FUNCTIONS
+    //
     private void Awake()
     {
         previousPosition = transform.position;
-        
         navAgent = GetComponent<NavMeshAgent>();
-        _trailRenderer = GetComponent<TrailRenderer>();
         navAgent.speed = MaxSpeed;
         path = new NavMeshPath();
-        
-        foreach (GameObject SafePoint in GameObject.FindGameObjectsWithTag("SafePoint"))
-        {
-            print("Searching");
-            if (closestSafeSurface == null) closestSafeSurface = SafePoint.transform;
-
-            if (Vector3.Distance((SafePoint.transform.position), transform.position) <
-                Vector3.Distance((closestSafeSurface.position), transform.position))
-            {
-                closestSafeSurface = SafePoint.transform;
-            }
-        }
-
-        
-        navAgent.CalculatePath(closestSafeSurface.position, path);
+        PaceIntervals = new List<float>();
+        CalculateAgentPath();
     }
-
-    private void Update()
-    {
-        //if ( closestSafeSurface != null)
-            //Debug.DrawLine(transform.position, closestSafeSurface.transform.position);
-
-            if (!Active) return;
-
-            if (ReachSafety) return;
-            
-            CaptureSpeed();
-            
-            GameObject indicatorObject;
-            NavMeshHit navMeshHit;
-            if (NavMesh.SamplePosition(transform.position, out navMeshHit, 1f, NavMesh.AllAreas))
-            {
-                if (navMeshHit.mask == 8)
-                {
-                    ReachSafety = true;
-                    Active = false;
-                    
-                    CalculateSpeedStatistics();
-                    
-                    CollegeScenarioManager.Instance.ReportFinish();
-
-                    int time = CollegeScenarioManager.Instance.time;
-                    int goalTime = CollegeScenarioManager.Instance.TimeGoal;
-                    
-                    if (time <= goalTime)
-                    {
-                        Instantiate(OnTime, startingPosition, Quaternion.identity, this.transform); 
-                        
-                    }
-                    else if (time < goalTime + (goalTime / 2))
-                    {
-                        Instantiate(JustOff, startingPosition, Quaternion.identity, this.transform);
-                    }
-                    else
-                    {
-                        Instantiate(TooSlow, startingPosition, Quaternion.identity, this.transform);
-                    }
-                    
-                }
-            }
-    }
-
-    private Vector3 previousPosition;
-    public List<float> PaceIntervals;
-    
-    
-
-    private void CaptureSpeed()
-    {
-        Vector3 curMove = transform.position - previousPosition;
-        float currentSpeed = curMove.magnitude / Time.deltaTime;
-        previousPosition = transform.position;
-
-        PaceIntervals.Add(currentSpeed);
-    }
-
-    public double MeanSpeed;
-    private void CalculateSpeedStatistics()
-    {
-        MeanSpeed = PaceIntervals.Average();
-    }
-
     private void OnEnable()
     {
-        startingPosition = transform.position;
+        // Necessary as the agent can be Enabled before the manager
+        if(CollegeScenarioManager.Instance)
+        {
+            CollegeScenarioManager.Instance.agents.Add(this);
+        }
+    }
+
+    private void Start()
+    {
         CollegeScenarioManager.Instance.agents.Add(this);
     }
 
@@ -126,11 +51,36 @@ public class CollegeAgent : MonoBehaviour
         CollegeScenarioManager.Instance.agents.Remove(this);
     }
     
-    public void SendGoal(Transform goal)
+    private void Update()
     {
-        Debug.Log("Received");
+        if (!Active) return;
+
+        CaptureSpeed();
+
+        if (NavMesh.SamplePosition(transform.position, out var navMeshHit, 1f, NavMesh.AllAreas))
+        {   if (navMeshHit.mask == 8)
+            {
+                TogglePauseAgent();
+                CollegeScenarioManager.Instance.ReportFinish(this);
+            }
+        }
+    }
+    
+    //
+    //  AGENT SCENARIO CONTROL FUNCTIONS
+    //
+    public void StartNavigation()
+    {
+        startingPosition = transform.position;
         Active = true;
         navAgent.SetPath(path);
+    }
+
+    public void TogglePauseAgent()
+    {
+        // Toggles the Active boolean and then stops or starts the agent
+        Active = !Active;
+        navAgent.isStopped = !Active;
     }
 
     public void ResetAgent()
@@ -138,12 +88,40 @@ public class CollegeAgent : MonoBehaviour
         Active = false;
         navAgent.ResetPath();
         navAgent.Warp(startingPosition);
-        _trailRenderer.Clear();
+        PaceIntervals.Clear();
     }
 
-    public void AnalysePath()
+    private void CalculateAgentPath()
     {
-        _trailRenderer.startColor = Color.blue;
-        _trailRenderer.endColor = Color.blue;
+        foreach (GameObject SafePoint in GameObject.FindGameObjectsWithTag("SafePoint"))
+        {
+            if (closestSafeSurface == null) closestSafeSurface = SafePoint.transform;
+
+            if (Vector3.Distance((SafePoint.transform.position), transform.position) <
+                Vector3.Distance((closestSafeSurface.position), transform.position))
+            {
+                closestSafeSurface = SafePoint.transform;
+            }
+        }
+        navAgent.CalculatePath(closestSafeSurface.position, path);
     }
+
+   
+    //
+    //  DATA ORIENTED METHODS
+    //
+    private void CaptureSpeed()
+    {
+        Vector3 curMove = transform.position - previousPosition;
+        float currentSpeed = curMove.magnitude / Time.deltaTime;
+        previousPosition = transform.position;
+
+        PaceIntervals.Add(currentSpeed);
+    }
+    
+
+
+    
+
+    
 }

@@ -26,7 +26,7 @@ public class IndicatorBlock : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            parentAgent.AnalysePath();
+            //parentAgent.AnalysePath();
         }
     }
 }
