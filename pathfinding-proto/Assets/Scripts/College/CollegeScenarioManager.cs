@@ -94,6 +94,8 @@ public class CollegeScenarioManager : MonoBehaviour
     {
         agentsFinished++;
         agentsFinishTime.Add(time);
+        
+        DataManager.AddAgentData(agent, time);
     }
     
 }

@@ -30,6 +30,7 @@ TagManager:
   - AgentDistanceOut
   - AgentObstructionOut
   - AgentNameOut
+  - GlobalCompletionOutTxt
   layers:
   - Default
   - TransparentFX

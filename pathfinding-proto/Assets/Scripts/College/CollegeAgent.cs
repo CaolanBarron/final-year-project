@@ -16,9 +16,6 @@ public class CollegeAgent : MonoBehaviour
     private NavMeshAgent navAgent;
     private NavMeshPath path;
     private Vector3 previousPosition;
-    private List<float> PaceIntervals;
-
-
     
     //
     // UNITY FUNCTIONS
@@ -29,7 +26,7 @@ public class CollegeAgent : MonoBehaviour
         navAgent = GetComponent<NavMeshAgent>();
         navAgent.speed = MaxSpeed;
         path = new NavMeshPath();
-        PaceIntervals = new List<float>();
+        paceIntervals = new List<float>();
         CalculateAgentPath();
     }
     private void OnEnable()
@@ -55,6 +52,7 @@ public class CollegeAgent : MonoBehaviour
     {
         if (!Active) return;
 
+        CountDistance();
         CaptureSpeed();
 
         if (NavMesh.SamplePosition(transform.position, out var navMeshHit, 1f, NavMesh.AllAreas))
@@ -88,7 +86,13 @@ public class CollegeAgent : MonoBehaviour
         Active = false;
         navAgent.ResetPath();
         navAgent.Warp(startingPosition);
-        PaceIntervals.Clear();
+        ResetAgentData();
+    }
+
+    private void ResetAgentData()
+    {
+        paceIntervals.Clear();
+        totalDistance = 0;
     }
 
     private void CalculateAgentPath()
@@ -108,20 +112,36 @@ public class CollegeAgent : MonoBehaviour
 
    
     //
-    //  DATA ORIENTED METHODS
+    //  DATA ORIENTED METHODS & VARIABLES
     //
+    
+    private List<float> paceIntervals;
+    public List<float> GetPaceIntervals()
+    {
+        return paceIntervals;
+    }
     private void CaptureSpeed()
     {
         Vector3 curMove = transform.position - previousPosition;
         float currentSpeed = curMove.magnitude / Time.deltaTime;
         previousPosition = transform.position;
 
-        PaceIntervals.Add(currentSpeed);
+        paceIntervals.Add(currentSpeed);
     }
     
+    private float totalDistance = 0;
+    public float GetTotalDistance()
+    {
+        return totalDistance;
+    }
+    private void CountDistance()
+    {
+        Vector3 distance = transform.position - previousPosition;
+        totalDistance += distance.magnitude;
+    }
 
 
-    
 
-    
+
+
 }

@@ -1,14 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
 public class DataManager : MonoBehaviour
 {
-    private float averageGlobalCompletionTime;
-    private float averageGlobalSpeed;
-    private float averageGlobalSlowestSpeed;
-    private float AverageGlobalObstructionsFaced;
+
 
     private string agentName;
     private float averageAgentSpeed;
@@ -23,9 +22,7 @@ public class DataManager : MonoBehaviour
     public int BottleneckQuantityQualifier;
     public int BottleneckDistanceQualifier;
 
-
-
-
+    private TextMeshProUGUI averageGlobalCompletionText;
     private TextMeshProUGUI averageGlobalSpeedText;
     private TextMeshProUGUI averageGlobalSlowestSpeedText;
     private TextMeshProUGUI averageGlobalDistanceText;
@@ -42,6 +39,8 @@ public class DataManager : MonoBehaviour
     {
         if (GameObject.FindWithTag("GlobalStatsPanel"))
         {
+            averageGlobalCompletionText =
+                GameObject.FindWithTag("GlobalCompletionOutTxt").GetComponent<TextMeshProUGUI>();
             averageGlobalSpeedText = GameObject.FindWithTag("GlobalSpeedOutTxt").GetComponent<TextMeshProUGUI>();
             averageGlobalSlowestSpeedText = GameObject.FindWithTag("GlobalSlowOutTxt").GetComponent<TextMeshProUGUI>();
             averageGlobalDistanceText = GameObject.FindWithTag("GlobalDistanceOutTxt").GetComponent<TextMeshProUGUI>();
@@ -73,6 +72,8 @@ public class DataManager : MonoBehaviour
         {
             CollegeScenarioManager.Instance.DataManager = this;
         }
+
+        agentsData = new List<AgentData>();
         
         AssignUI();
         
@@ -84,8 +85,81 @@ public class DataManager : MonoBehaviour
             CollegeScenarioManager.Instance.DataManager = null;
         }
     }
-    
-    
+
+    //
+    //  Global Stats 
+    // 
+    private float averageGlobalCompletionTime = 0;
+    private float averageGlobalSpeed = 0;
+    private float averageGlobalSlowestSpeed = 0;
+    private int AverageGlobalObstructionsFaced = 0;
+    private float AverageGlobalDistanceTravelled = 0;
+    private struct AgentData
+    {
+        public float CompletionTime;
+        public float AverageSpeed;
+        public float SlowestSpeed;
+        public int ObstructionsFaced;
+        public float DistanceTraveled;
+    }
+
+    private List<AgentData> agentsData;
+
+    public void AddAgentData(CollegeAgent agent, float completionTime)
+    {
+        AgentData agentData = new AgentData();
+
+        agentData.CompletionTime = completionTime;
+        List<float> paceIntervals = agent.GetPaceIntervals();
+        
+        agentData.AverageSpeed = paceIntervals.Average();
+        agentData.SlowestSpeed = paceIntervals.Min();
+        
+        agentData.ObstructionsFaced = 0;
+        
+        agentData.DistanceTraveled = agent.GetTotalDistance();
+
+        agentsData.Add(agentData);
+        
+        updateGlobalStats();
+    }
+    private void updateGlobalStats()
+    {
+        if (agentsData.Count < 1) return;
+        
+        float totalCompletionTime = 0.0f;
+        float totalAverageSpeed = 0.0f;
+        float totalSlowestSpeed = 0.0f;
+        int totalObstructionsFaced = 0;
+        float totalDistanceTravelled = 0.0f;
+
+        foreach (AgentData agentData in agentsData)
+        {
+            totalCompletionTime += agentData.CompletionTime;
+            totalAverageSpeed += agentData.AverageSpeed;
+            totalSlowestSpeed += agentData.SlowestSpeed;
+            totalObstructionsFaced += agentData.ObstructionsFaced;
+            totalDistanceTravelled += agentData.DistanceTraveled;
+        }
+
+        int count = agentsData.Count();
+        averageGlobalCompletionTime = totalCompletionTime / count;
+        averageGlobalSpeed = totalAverageSpeed / count;
+        averageGlobalSlowestSpeed = totalSlowestSpeed / count;
+        AverageGlobalObstructionsFaced = totalObstructionsFaced / count;
+        AverageGlobalDistanceTravelled = totalDistanceTravelled / count;
+
+    }
+
+    private void updateGlobalUI()
+    {
+        averageGlobalCompletionText.text = averageGlobalCompletionTime.ToString();
+        averageGlobalSpeedText.text = averageGlobalSpeed.ToString();
+        averageGlobalSlowestSpeedText.text = averageGlobalSlowestSpeed.ToString();
+        averageGlobalObstructionsText.text = AverageGlobalObstructionsFaced.ToString();
+        averageGlobalDistanceText.text = AverageGlobalDistanceTravelled.ToString();
+    }
+
     //
     //  BOTTLENECK CREATION
     //
@@ -125,4 +199,16 @@ public class DataManager : MonoBehaviour
         mesh.RecalculateNormals();
         return mesh;
     }
+    //
+    //  UPDATE FUNCTION
+    //  
+    private void Update()
+    {
+        updateGlobalUI();
+    }
 }
+
+
+
+
+
