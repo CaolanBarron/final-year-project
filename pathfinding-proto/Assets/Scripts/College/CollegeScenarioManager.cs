@@ -12,7 +12,10 @@ public class CollegeScenarioManager : MonoBehaviour
     private bool scenarioRunning = false;
     public int time;
     private float decimalTime;
+    
     public List<CollegeAgent> agents;
+    public DataManager DataManager;
+    
     public List<int> agentsFinishTime;
 
     private void Awake()
