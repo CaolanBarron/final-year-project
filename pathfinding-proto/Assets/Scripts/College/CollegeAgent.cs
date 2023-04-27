@@ -16,6 +16,7 @@ public class CollegeAgent : MonoBehaviour
     private NavMeshAgent navAgent;
     private NavMeshPath path;
     private Vector3 previousPosition;
+    private LineRenderer pathDisplayer;
     
     //
     // UNITY FUNCTIONS
@@ -28,6 +29,7 @@ public class CollegeAgent : MonoBehaviour
         path = new NavMeshPath();
         paceIntervals = new List<float>();
         CalculateAgentPath();
+        pathDisplayer = GameObject.FindWithTag("PathDisplayer").GetComponent<LineRenderer>();
     }
     private void OnEnable()
     {
@@ -61,6 +63,21 @@ public class CollegeAgent : MonoBehaviour
                 TogglePauseAgent();
                 CollegeScenarioManager.Instance.ReportFinish(this);
             }
+        }
+    }
+    
+    private void OnMouseOver()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            foreach (var point in path.corners)
+            {
+                Debug.Log(point);
+            }
+
+            pathDisplayer.positionCount = path.corners.Length;
+            pathDisplayer.SetPositions(path.corners);
+            CollegeScenarioManager.Instance.AssignSelectedAgent(this);
         }
     }
     

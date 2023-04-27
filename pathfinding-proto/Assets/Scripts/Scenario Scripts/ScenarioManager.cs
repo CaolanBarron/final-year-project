@@ -40,6 +40,7 @@ public class ScenarioManager : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnLevelFinishedLoading;
     }
+    
 
     public void LoadLevel(int index)
     {

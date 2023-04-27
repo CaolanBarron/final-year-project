@@ -15,6 +15,8 @@ public class DataManager : MonoBehaviour
     private float agentDistance;
     private int agentObstructionsFaced;
 
+    private CollegeAgent selectedAgent;
+
     public List<Vector3> BottleneckLocationsCandidates;
     public List<Vector3> BottleneckLocations;
 
@@ -34,6 +36,8 @@ public class DataManager : MonoBehaviour
     private TextMeshProUGUI agentSlowestSpeedText;
     private TextMeshProUGUI agentDistanceText;
     private TextMeshProUGUI agentObstructionsText;
+
+    private GameObject inputPanel;
 
     private void AssignUI()
     {
@@ -55,6 +59,15 @@ public class DataManager : MonoBehaviour
             agentSlowestSpeedText = GameObject.FindWithTag("AgentSlowOut").GetComponent<TextMeshProUGUI>();
             agentDistanceText = GameObject.FindWithTag("AgentDistanceOut").GetComponent<TextMeshProUGUI>();
             agentObstructionsText = GameObject.FindWithTag("AgentObstructionOut").GetComponent<TextMeshProUGUI>();
+            
+            agentStatsPanel.SetActive(false);
+        }
+
+        if (GameObject.FindWithTag("InputPanel"))
+        {
+            inputPanel = GameObject.FindWithTag("InputPanel");
+            
+            inputPanel.SetActive(false);
         }
     }
     
@@ -86,20 +99,49 @@ public class DataManager : MonoBehaviour
         }
     }
 
+    public void selectAgent(CollegeAgent agent)
+    {
+        if (agentStatsPanel)
+        {
+            agentStatsPanel.SetActive(true);
+        }
+
+        if (inputPanel)
+        {
+            inputPanel.SetActive(true);
+        }
+        selectedAgent = agent;
+        
+    }
+
+    public void deSelectAgent()
+    {
+        if (agentStatsPanel)
+        {
+            agentStatsPanel.SetActive(false);
+        }
+
+        if (inputPanel)
+        {
+            inputPanel.SetActive(false);
+        }
+        selectedAgent = null;
+    }
+
     //
     //  Global Stats 
     // 
     private float averageGlobalCompletionTime = 0;
     private float averageGlobalSpeed = 0;
     private float averageGlobalSlowestSpeed = 0;
-    private int AverageGlobalObstructionsFaced = 0;
+    private float AverageGlobalObstructionsFaced = 0;
     private float AverageGlobalDistanceTravelled = 0;
     private struct AgentData
     {
         public float CompletionTime;
         public float AverageSpeed;
         public float SlowestSpeed;
-        public int ObstructionsFaced;
+        public float ObstructionsFaced;
         public float DistanceTraveled;
     }
 
@@ -130,7 +172,7 @@ public class DataManager : MonoBehaviour
         float totalCompletionTime = 0.0f;
         float totalAverageSpeed = 0.0f;
         float totalSlowestSpeed = 0.0f;
-        int totalObstructionsFaced = 0;
+        float totalObstructionsFaced = 27.0003f;
         float totalDistanceTravelled = 0.0f;
 
         foreach (AgentData agentData in agentsData)
@@ -158,6 +200,27 @@ public class DataManager : MonoBehaviour
         averageGlobalSlowestSpeedText.text = averageGlobalSlowestSpeed.ToString();
         averageGlobalObstructionsText.text = AverageGlobalObstructionsFaced.ToString();
         averageGlobalDistanceText.text = AverageGlobalDistanceTravelled.ToString();
+    }
+
+    private void UpdateSelectedAgentStats()
+    {
+        
+    }
+    
+
+    // Should be called by scenario manager
+    public void ResetData()
+    {
+        // Clear the agents list
+        agentsData.Clear();
+        // Reset the ui
+        averageGlobalCompletionTime = 0;
+        averageGlobalSpeed = 0;
+        averageGlobalSlowestSpeed = 0;
+        AverageGlobalObstructionsFaced = 0;
+        AverageGlobalDistanceTravelled = 0;
+        
+        updateGlobalUI();
     }
 
     //
@@ -205,6 +268,11 @@ public class DataManager : MonoBehaviour
     private void Update()
     {
         updateGlobalUI();
+
+        if (selectedAgent)
+        {
+            UpdateSelectedAgentStats();
+        }
     }
 }
 

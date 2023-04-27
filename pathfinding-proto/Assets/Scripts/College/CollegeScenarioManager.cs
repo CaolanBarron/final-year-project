@@ -42,6 +42,11 @@ public class CollegeScenarioManager : MonoBehaviour
             ResetScenario();
         }
 
+        if (Input.GetMouseButtonDown(1))
+        {
+            DataManager.deSelectAgent();
+        }
+
         if (scenarioRunning)
         {
             decimalTime += 1 * Time.deltaTime;
@@ -81,12 +86,14 @@ public class CollegeScenarioManager : MonoBehaviour
         {
             agent.ResetAgent();
         }
+        DataManager.ResetData();
         ResetScenarioData();
     }
 
     private void ResetScenarioData()
     {
         time = 0;
+        timerText.text = time.ToString();
         decimalTime = 0.0f;        
     }
 
@@ -96,6 +103,11 @@ public class CollegeScenarioManager : MonoBehaviour
         agentsFinishTime.Add(time);
         
         DataManager.AddAgentData(agent, time);
+    }
+
+    public void AssignSelectedAgent(CollegeAgent agent)
+    {
+        DataManager.selectAgent(agent);   
     }
     
 }

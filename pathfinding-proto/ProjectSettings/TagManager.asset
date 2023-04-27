@@ -31,6 +31,8 @@ TagManager:
   - AgentObstructionOut
   - AgentNameOut
   - GlobalCompletionOutTxt
+  - InputPanel
+  - PathDisplayer
   layers:
   - Default
   - TransparentFX
