@@ -44,7 +44,7 @@ public class CollegeScenarioManager : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-            DataManager.deSelectAgent();
+            DataManager.DeSelectAgent();
         }
 
         if (scenarioRunning)
@@ -107,7 +107,7 @@ public class CollegeScenarioManager : MonoBehaviour
 
     public void AssignSelectedAgent(CollegeAgent agent)
     {
-        DataManager.selectAgent(agent);   
+        DataManager.SelectAgent(agent);   
     }
     
 }

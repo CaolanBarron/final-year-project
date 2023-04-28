@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class DataManager : MonoBehaviour
 {
@@ -37,7 +40,12 @@ public class DataManager : MonoBehaviour
     private TextMeshProUGUI agentDistanceText;
     private TextMeshProUGUI agentObstructionsText;
 
+    private LineRenderer pathDisplayer;
+    
     private GameObject inputPanel;
+    private Button rewindButton;
+    private Button pauseButton;
+    private Button forwardButton;
 
     private void AssignUI()
     {
@@ -66,8 +74,7 @@ public class DataManager : MonoBehaviour
         if (GameObject.FindWithTag("InputPanel"))
         {
             inputPanel = GameObject.FindWithTag("InputPanel");
-            
-            inputPanel.SetActive(false);
+            inputPanel.SetActive(true);
         }
     }
     
@@ -89,6 +96,11 @@ public class DataManager : MonoBehaviour
         agentsData = new List<AgentData>();
         
         AssignUI();
+
+        if (GameObject.FindWithTag("PathDisplayer"))
+        {
+            pathDisplayer = GameObject.FindWithTag("PathDisplayer").GetComponent<LineRenderer>();
+        }
         
     }
     private void OnDisable()
@@ -99,7 +111,7 @@ public class DataManager : MonoBehaviour
         }
     }
 
-    public void selectAgent(CollegeAgent agent)
+    public void SelectAgent(CollegeAgent agent)
     {
         if (agentStatsPanel)
         {
@@ -112,9 +124,15 @@ public class DataManager : MonoBehaviour
         }
         selectedAgent = agent;
         
+        //Must be done
+        DisplayAgentPath();
+
+        agentName = selectedAgent.name;
+        agentNameText.text = agentName;
+
     }
 
-    public void deSelectAgent()
+    public void DeSelectAgent()
     {
         if (agentStatsPanel)
         {
@@ -126,6 +144,20 @@ public class DataManager : MonoBehaviour
             inputPanel.SetActive(false);
         }
         selectedAgent = null;
+        
+        //Clear the path when agent is deselected
+        pathDisplayer.positionCount = 0;
+    }
+    
+    private void DisplayAgentPath()
+    {
+        Vector3[] path = selectedAgent.GetPathCorners();
+        for (int i = 0; i < path.Length; i++)
+        {
+            path[i].y += 1;
+        }
+        pathDisplayer.positionCount = path.Length;
+            pathDisplayer.SetPositions(path);
     }
 
     //
@@ -146,24 +178,33 @@ public class DataManager : MonoBehaviour
     }
 
     private List<AgentData> agentsData;
-
+    private int timeCalled = 0;
     public void AddAgentData(CollegeAgent agent, float completionTime)
     {
         AgentData agentData = new AgentData();
 
         agentData.CompletionTime = completionTime;
         List<float> paceIntervals = agent.GetPaceIntervals();
-        
+        for (int i = 0; i < 10; i++)
+        {
+            paceIntervals.RemoveAt(i);
+        } 
         agentData.AverageSpeed = paceIntervals.Average();
         agentData.SlowestSpeed = paceIntervals.Min();
         
-        agentData.ObstructionsFaced = 0;
+        agentData.ObstructionsFaced = agent.bottleNeckCandidates.Count;
         
         agentData.DistanceTraveled = agent.GetTotalDistance();
 
         agentsData.Add(agentData);
         
         updateGlobalStats();
+        //Debug.Log(agent.bottleNeckCandidates.Count);
+        // TEMPORARY BLOCK PLACEMENT
+        foreach (Vector3 point in agent.bottleNeckCandidates)
+        {
+            createCubeObject(point, new Color(1.0f, 0.0f,0.0f, 0.5f));
+        }
     }
     private void updateGlobalStats()
     {
@@ -172,7 +213,7 @@ public class DataManager : MonoBehaviour
         float totalCompletionTime = 0.0f;
         float totalAverageSpeed = 0.0f;
         float totalSlowestSpeed = 0.0f;
-        float totalObstructionsFaced = 27.0003f;
+        float totalObstructionsFaced = 0.0f;
         float totalDistanceTravelled = 0.0f;
 
         foreach (AgentData agentData in agentsData)
@@ -204,7 +245,25 @@ public class DataManager : MonoBehaviour
 
     private void UpdateSelectedAgentStats()
     {
-        
+        if (selectedAgent.GetPaceIntervals().Any())
+        {
+            List<float> pace = selectedAgent.GetPaceIntervals();
+            averageAgentSpeed = pace.Average();
+            agentSlowestSpeed = pace.Min();
+        }
+
+        agentDistance = selectedAgent.GetTotalDistance();
+        agentObstructionsFaced = selectedAgent.bottleNeckCandidates.Count;
+        UpdateSelectedAgentUI(); 
+    }
+
+    private void UpdateSelectedAgentUI()
+    {
+        agentNameText.text = agentName;
+        averageAgentSpeedText.text = averageAgentSpeed.ToString();
+        agentSlowestSpeedText.text = agentSlowestSpeed.ToString();
+        agentDistanceText.text = agentDistance.ToString();
+        agentObstructionsText.text = agentObstructionsFaced.ToString();
     }
     
 
@@ -219,8 +278,16 @@ public class DataManager : MonoBehaviour
         averageGlobalSlowestSpeed = 0;
         AverageGlobalObstructionsFaced = 0;
         AverageGlobalDistanceTravelled = 0;
+
+        agentName = "";
+        averageAgentSpeed = 0;
+        agentSlowestSpeed = 0;
+        agentObstructionsFaced = 0;
+        agentDistance = 0;
         
+        DeSelectAgent();
         updateGlobalUI();
+        UpdateSelectedAgentUI();
     }
 
     //
@@ -229,14 +296,15 @@ public class DataManager : MonoBehaviour
     private void createCubeObject(Vector3 position, Color matColor)
     {
         GameObject cube = new GameObject("bottleneck");
+        cube.transform.position = position;
         MeshRenderer mr = cube.AddComponent<MeshRenderer>();
-        cube.AddComponent<MeshFilter>().mesh = createCubeMesh(2);
+        cube.AddComponent<MeshFilter>().mesh = CreateCubeMesh(2);
 
         Material bottleneckMat = new Material(Shader.Find("Legacy Shaders/Transparent/Diffuse"));
         bottleneckMat.color = matColor;
         mr.material = bottleneckMat;
     }
-    private Mesh createCubeMesh(float fSize)
+    private Mesh CreateCubeMesh(float fSize)
     {
         float fHS = fSize / 2;
         Mesh mesh = new Mesh();
@@ -271,10 +339,21 @@ public class DataManager : MonoBehaviour
 
         if (selectedAgent)
         {
+            if (Input.GetKeyDown(KeyCode.K))
+            {
+               selectedAgent.flipPath();
+            }
+
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                selectedAgent.TogglePauseAgent();
+            }
             UpdateSelectedAgentStats();
         }
     }
 }
+
+
 
 
 
